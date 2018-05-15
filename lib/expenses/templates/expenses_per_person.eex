@@ -1,0 +1,8 @@
+Por Persona
+============
+Este mes han venido los siguientes gastos:
+<%= for {person, person_expenses } <- people_list do %> <% total_spent = Enum.reduce(person_expenses, 0, fn({_item, _per, amount}, acc)-> amount + acc end) %> <%= if total_spent >= 0 do %>
+  <%= person %> este mes tiene que pagar <%= total_spent %> de los siguientes conceptos: <% else %> <%= person %> este mes tendria que recibir <%= total_spent %> de los siguientes conceptos: <% end %> <%= for {item, percentage, amount } <- person_expenses do %> 
+  - <%= item %>(<%= percentage * 100%>%): <%= amount %> <% end %>
+  ------------------- TOTAL       <%= total_spent %>
+<% end %>
