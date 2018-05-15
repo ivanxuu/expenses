@@ -16,11 +16,19 @@ defmodule Expenses do
         Bob(100%): -20
   """
   def summary(expenses_list) when is_list(expenses_list) do
-    item = Calculations.process_items(expenses_list, @percentages_table)
-      |> Render.expenses_per_item()
-    people = Calculations.process_persons(expenses_list, @percentages_table)
-      |> Render.expenses_per_person()
-    item <> "\n" <> people
+    process_items(expenses_list)
+    <> "\n"
+    <> process_persons(expenses_list)
+  end
+
+  defp process_items(expenses_list) do
+    Calculations.process_items(expenses_list, @percentages_table)
+    |> Render.expenses_per_item()
+  end
+
+  defp process_persons(expenses_list) do
+    Calculations.process_persons(expenses_list, @percentages_table)
+    |> Render.expenses_per_person()
   end
 
   #def markdown(expenses_list) when is_list(expenses_list) do

@@ -1,30 +1,30 @@
 defmodule Expenses.Calculations do
 
   @doc """
-      iex> process_items(["Bungalow Rent": 103, "Telephone Bill": -20], %{
+
+      iex> process_items(["Bungalow Rent": {103, [bob: 0.3333, alice: 0.3333, carol: 0.3333]}, "Telephone Bill": -20], %{
       ...>   "Bungalow Rent" => [bob: 0.33, alice: 0.166],
       ...>   "Telephone Bill" => [bob: 0.33, alice: 0.166],
       ...>   "Car Gas" => [bob: 1]
       ...> })
       [
         {"Telephone Bill", -20,[ {:bob, -0.33, -6.6000000000000005}, {:alice, -0.166, -3.3200000000000003}]},
-        {"Bungalow Rent", 103, [{:bob, 0.33, 33.99}, {:alice, 0.166, 17.098000000000003}]}
+        {"Bungalow Rent", 103, [{:bob, 0.33, 33.99}, {:alice, 0.3333, 33.99}, {:carol, 0.3333, 33.99} ]}
       ]
   """
   def process_items(expenses_list, percentages_table) do
     _process_items(expenses_list, percentages_table, [])
-    #expenses_list
-    ## Calculate how much each person should_pay
-    #|>Enum.map(&calculate_amount_item_per_person(&1, percentages_table))
-    ## Order by price, first expenses, last savings
-    #|>Enum.sort(fn({_, price_a, _}, {_, price_b, _})-> price_a <= price_b end)
+  end
+  defp _process_items([{item, {total_spent, force_percentages}}|rest], percentages_table, acc) when is_number(total_spent) do
+    percentages_table = Map.put(percentages_table, Atom.to_string(item), force_percentages)
+    _process_items([{item, total_spent}|rest], percentages_table, acc)
   end
   defp _process_items([{item, total_spent}|rest], percentages_table, acc) when is_number(total_spent) do
     _process_items(rest,
       percentages_table,
       [calculate_amount_item_per_person({item, total_spent}, percentages_table) | acc])
   end
-  defp _process_items([], _percentages_table, acc) do
+  defp _process_items([], percentages_table, acc) do
     acc
     |>Enum.sort(fn({_, price_a, _}, {_, price_b, _})-> price_a <= price_b end)
   end
