@@ -8,8 +8,15 @@ defmodule Expenses.Calculations do
       ...>   "Car Gas" => [bob: 1]
       ...> })
       [
-        {"Telephone Bill", -20,[ {:bob, -0.33, -6.6000000000000005}, {:alice, -0.166, -3.3200000000000003}]},
-        {"Bungalow Rent", 103, [{:bob, 0.33, 33.99}, {:alice, 0.3333, 33.99}, {:carol, 0.3333, 33.99} ]}
+        {"Telephone Bill", -20, [
+          {:bob,    0.33,   %Money{amount: -660, currency: :EUR}},
+          {:alice,  0.166,  %Money{amount: -332, currency: :EUR}}
+        ]},
+        {"Bungalow Rent", 103, [
+          {:bob,    0.3333, %Money{amount: 3433, currency: :EUR}},
+          {:alice,  0.3333, %Money{amount: 3433, currency: :EUR}},
+          {:carol,  0.3333, %Money{amount: 3433, currency: :EUR}}
+        ]}
       ]
   """
   def process_items(expenses_list, percentages_table) do
@@ -33,9 +40,11 @@ defmodule Expenses.Calculations do
       [calculate_amount_item_per_person({item, total_spent}, percentages_table) | acc])
   end
   # Finish call. Order all items.
-  defp _process_items([], percentages_table, acc) do
+  defp _process_items([], _percentages_table, acc) do
     acc
-    |>Enum.sort(fn({_, price_a, _}, {_, price_b, _})-> price_a <= price_b end)
+    |>Enum.sort(fn({_, price_a, _}, {_, price_b, _})->
+        price_a <= price_b
+      end)
   end
 
   # iex> calculate_amount_item_per_person({"Bungalow Rent", 103},
@@ -44,8 +53,10 @@ defmodule Expenses.Calculations do
   defp calculate_amount_item_per_person({item, total_spent}, percentages_table) do
     with \
       item <- Atom.to_string(item),
-      {:ok, percentages} <- get_percentages(item, percentages_table) do
-      {item, total_spent, calculate_amount_per_person(total_spent, percentages)}
+      {:ok, item_percentages} <- get_percentages(item, percentages_table),
+      amount_per_person <-
+           calculate_amount_per_person(total_spent, item_percentages) do
+      {item, total_spent, amount_per_person}
     end
   end
 
@@ -65,9 +76,14 @@ defmodule Expenses.Calculations do
 
   # iex> calculate_amount_item_per_person(200, bob: 0.33, alice: 0.66)
   # [{"bob", 0.33, 66}, {"alice", 0.66, 132}]
-  defp calculate_amount_per_person(total, percentages) do
+  defp calculate_amount_per_person(total, percentages) when is_number(total) do
     Enum.map(percentages, fn({person, percentage})->
-      {person, percentage, total * percentage}
+      with \
+        {:ok, total_money} <- Money.parse(total/1),
+        pay_pers_money <- Money.multiply(total_money, percentage)
+      do
+        {person, percentage, pay_pers_money}
+      end
     end)
   end
 
