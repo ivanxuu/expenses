@@ -15,22 +15,32 @@ defmodule Expenses.Calculations do
   def process_items(expenses_list, percentages_table) do
     _process_items(expenses_list, percentages_table, [])
   end
-  defp _process_items([{item, {total_spent, force_percentages}}|rest], percentages_table, acc) when is_number(total_spent) do
-    percentages_table = Map.put(percentages_table, Atom.to_string(item), force_percentages)
+  # The item includes some custom percentages of how much every person should
+  # pay.
+  defp _process_items([{item, {total_spent, force_percentages}}|rest],
+      percentages_table, acc)
+      when is_number(total_spent) do
+    #Update percentages table with custom percents and add the item
+    percentages_table = percentages_table
+                        |>Map.put(Atom.to_string(item), force_percentages)
     _process_items([{item, total_spent}|rest], percentages_table, acc)
   end
-  defp _process_items([{item, total_spent}|rest], percentages_table, acc) when is_number(total_spent) do
+  # Base call
+  defp _process_items([{item, total_spent}|rest], percentages_table, acc)
+      when is_number(total_spent) do
     _process_items(rest,
       percentages_table,
       [calculate_amount_item_per_person({item, total_spent}, percentages_table) | acc])
   end
+  # Finish call. Order all items.
   defp _process_items([], percentages_table, acc) do
     acc
     |>Enum.sort(fn({_, price_a, _}, {_, price_b, _})-> price_a <= price_b end)
   end
 
-  # calculate_amount_item_per_person({"Bungalow Rent", 103}) do
-  # {"Bungalow Rent", [Bob: 51.50, Alice: 51.50]}
+  # iex> calculate_amount_item_per_person({"Bungalow Rent", 103},
+  # ...>   %{"Bungalow Rent"=> [bob: 0.5, alice: 0.5]})
+  # {"Bungalow Rent", [bob: 51.50, alice: 51.50]}
   defp calculate_amount_item_per_person({item, total_spent}, percentages_table) do
     with \
       item <- Atom.to_string(item),
@@ -39,7 +49,8 @@ defmodule Expenses.Calculations do
     end
   end
 
-  # get_percentages("Bungalow Rent")
+  # iex> get_percentages("Bungalow Rent",
+  # ...>   %{"Bungalow Rent"=> [bob: 0.5, alice: 0.5]})
   # [bob: 0.33, alice: 0.166],
   defp get_percentages(item, percentages_table) when is_binary(item) do
     percentages_table
@@ -52,7 +63,7 @@ defmodule Expenses.Calculations do
       end
   end
 
-  # calculate_amount_item_per_person(200, bob: 0.33, alice: 0.66)
+  # iex> calculate_amount_item_per_person(200, bob: 0.33, alice: 0.66)
   # [{"bob", 0.33, 66}, {"alice", 0.66, 132}]
   defp calculate_amount_per_person(total, percentages) do
     Enum.map(percentages, fn({person, percentage})->
