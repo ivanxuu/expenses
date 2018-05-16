@@ -8,6 +8,14 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
+config :money,
+  default_currency: :EUR,
+  separator: ".",
+  delimeter: ",",
+  symbol: true,
+  symbol_on_right: true,
+  symbol_space: false
+
 # You can configure your application as:
 #
 #     config :expenses, key: :value
