@@ -16,6 +16,8 @@ config :money,
   symbol_on_right: true,
   symbol_space: false
 
+config :expenses, MyApp.Gettext, default_locale: "es"
+
 # You can configure your application as:
 #
 #     config :expenses, key: :value

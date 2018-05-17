@@ -1,6 +1,6 @@
-Por Gastos
+<%= gettext "By expenses" %>
 ============
-Este mes han venido los siguientes gastos:
+<%= gettext "This month we have the following expenses:" %>
 <%= for {item, total_spent, pay_person} <- expenses_list do %> 
-  - <%= item %>. <%= total_spent |> print_money() %> <%= if total_spent >= 0 do %> Los cuales se van a pagar de la siguiente forma: <% else %> Los cuales se van a repartir de la siguiente forma: <% end %> <%= for {person, percentage, person_pays} <- pay_person do %>
+  - <%= item %>. <%= total_spent |> print_money() %> <%= if total_spent >= 0 do %> <%= gettext "Which are going to be paid as:" %> <% else %> <%= gettext "Which are going to be shared out as:"%> <% end %> <%= for {person, percentage, person_pays} <- pay_person do %>
     - <%= person %> (<%= percentage * 100%>%): <%= person_pays %> <% end %> <% end %>
