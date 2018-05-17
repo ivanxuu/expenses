@@ -3,7 +3,7 @@
 <%= gettext "This month we have the following expenses:" %>
 <%= for {person, person_expenses } <- people_list do %> <%
   total_spent = Enum.reduce(person_expenses, 0, fn({_item, _per, amount}, acc)-> Money.add(amount, acc) end)
-  %> *<%= person %>* <%= if total_spent >= 0 do %> <%= gettext "this month has to pay" %> <%= total_spent %> <%= gettext "for the following items:" %> <% else %> <%= gettext "this month has to receive" %> <%= total_spent %> <%= gettext "for the following items:" %> <% end %> <%= for {item, percentage, amount } <- person_expenses do %>
+%> *<%= person %>*<%= if Money.negative?(total_spent) do %> <%= gettext "this month has to pay" %> <%= total_spent %> <%= gettext "for the following items:" %> <% else %> <%= gettext "this month has to receive" %> <%= total_spent %> <%= gettext "for the following items:" %> <% end %> <%= for {item, percentage, amount } <- person_expenses do %>
     - <%= item %>(<%= percentage * 100%>%): <%= amount %> <% end %>
     ------------------- <%= gettext "TOTAL"%> <%= total_spent %>
 
