@@ -2,5 +2,6 @@
 ============
 <%= gettext "This month we have the following expenses:" %>
 <%= for {item, total_spent, pay_person} <- expenses_list do %> 
-  - <%= item %>. <%= total_spent |> print_money() %> <%= if total_spent >= 0 do %> <%= gettext "Which are going to be paid as:" %> <% else %> <%= gettext "Which are going to be shared out as:"%> <% end %> <%= for {person, percentage, person_pays} <- pay_person do %>
-    - <%= person %> (<%= percentage * 100%>%): <%= person_pays %> <% end %> <% end %>
+  - <%= item %>. <%= total_spent |> print_money() %> <%= if total_spent < 0 do %> <%= gettext "Which are going to be paid as:" %> <% else %> <%= gettext "Which are going to be shared out as:"%> <% end %> <%= for {person, percentage, person_pays} <- pay_person do %>
+    - <%= "#{person}(#{ percentage * 100 }%):" |> String.pad_trailing(20) %> <%=
+      person_pays |> Money.to_string() |> String.pad_leading(8) %> <% end %> <% end %>
